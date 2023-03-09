@@ -19,29 +19,46 @@ provide.'''
 class JugProblem(Problem):
 
     #Reference: https://www.engineeringenotes.com/artificial-intelligence-2/state-space-search/notes-on-water-jug-problem-artificial-intelligence/34582#:~:text=The%20state%20space%20for%20this,in%20the%203%2Dgallon%20jug.
+    a = 0; b = 0; # starting amount of water in jugs
+    jugA = 9; jugB = 4 # jug capacity
+
 
     def __init__(self, initial, goal):
-        Problem.__init(self,initial,goal)
-        jugA = 0 # holds 4L
-        jugB = 0 # holds 9L
-        
-        initState = (0,0) # define our start state (both jugs are empty)
-        goalState = (0,6) # define our goal state (jug B holds 6L)
+        Problem.__init__(self,initial,goal)
 
 
 
+    # Builds a list of actions from which to choose from 
     def actions(self, state):
+
+        list=[] # store the list of actions here
+
+        a = state[JugProblem.a]; b = state[JugProblem.b]
+
+        # 1 - fill jug A fully
+        if self.validate_state(a + 4, b):
+            # the string returned will be identified in results NOT USED ANYWHERE ELSE  
+            list.append() # remember, the string use here is to help identify programmatic flow
+
 
         # if jugA is full:
 
         # if jugB is full:
+        return list
 
+    # a - what is being done to the water in jug a
+    # b - what is being done to the water in jug b
+    def validate_state(self, a, b):
+        
+        if a > 9 or b > 6: # Capcity constraint
+            return False 
+        #
 
     def result(self, state, action):
 
         '''
         State space planning:
-        let's determineour choices given the two jugs:
+        let's determine our choices given the two jugs:
         Start: (0, 0)
                 
         
@@ -52,4 +69,6 @@ class JugProblem(Problem):
     def main():
         print('Testing the Jug problem')
         #print("Initial state: ", initState,"Goal state:", goalState)
-        
+        '''
+        Desired output:
+        (a,b)'''

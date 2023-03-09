@@ -1,11 +1,10 @@
     State               Rule                            Effect
-(a, b) -> (4, b)                                  Jug A can hold 4L
-(a, b) -> (a, 6)                                  Jug B can hold 6L
+(a, b) -> (9, b)                                  Jug A can hold 9L
+(a, b) -> (a, 4)                                  Jug B can hold 4L
 (a, b) -> (a - a, b)    a > 0            A must not be empty to empty into B
 (a, b) -> (a, b - b)    b > 0            B must not be empty to empty into A
 (a, b) -> (0, b)        a > 0            A must have water in order to be dumped
 (a, b) -> (a, 0)        b > 0            B must have water in order to be dumped
-
 (a, b) -> [4, b - (4 - a)]      
     Pouring jug B into Jug A which already contains 1L...
     Since we're adding B to A, we can't exceed A.  To ensure this:
@@ -21,3 +20,5 @@ pouring ALL the water from B into A
 pouring ALL the water from A into B
 (a, b) -> (0, a + b)        a + b <= 3 AND a > 0 (see line 5)
 
+
+State 

@@ -21,7 +21,7 @@ class BRP(Problem):
         # list of descriptive actions
         list=[]
         #temp variables for clarity:
-        lb, rb, lr, rr, boat = state[BRP .LB], state[BRP.RB], state[BRP.LR],state[BRP.RR], state[BRP.B]
+        lb, rb, lr, rr, boat = state[BRP.LB], state[BRP.RB], state[BRP.LR],state[BRP.RR], state[BRP.B]
         
         if boat == 1: #boat on the right side
             #1BL - can we move 1 Banker left?
