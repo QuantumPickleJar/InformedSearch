@@ -127,15 +127,68 @@ class RushHour(Problem):
         self.heuristic=heuristic
          
     def actions(self, state):     
+
+        '''
+         To make for simpler programming, recall that a 2D board is a matrix
+         which can be flattened to a list of size i * j (where i and j are 
+         dimensions of the board)  
+         Thus, in a game board of size N*N, to access an element at row i and column j:  
+                (i * N) +  j
+        '''
+        
+        actions = []         # Tuple: { CarToMove, leftChange, topchange }
+        
         # determine where the red car can go
+        car_red = state.cars[0]
 
+        # If the car is horizontal
+        if car_red.orientation:         
+            if car_red.left > 0:        # left is valid
+                actions.append((car_red, -1, 0))
 
+            # if car_red.left < (state.grid[car_red.left] * 6) - car_red.L:        # right is valid
+            if car_red.left < state.grid - car_red.L:        # right is valid
+                actions.append((car_red, 1, 0))
+            
+        else: # if the car is vertical 
+            if car_red.top > 0:         # up is valid
+                actions.append((car_red, 0, 1))
+            
+            # if car_red.top > (state.grid[car_red.top] * 6) - car_red.L:         # down is valid
+            if car_red.top < state.grid - car_red.L:         # down is valid
+                actions.append((car_red, 0, -1))
+            
+        
+        # determine where OTHER cars can go 
+        #pos[0] = left, pos[1] = top
+        for car in state.cars:
+            x = car.left
+            y = car.top
+            
+            # horizontal 
+            if car.orientation: 
+                # check left
+                if x > 0 and (state[x] * 6) + y - car.L == -1:
+                    actions.append((car, -1, 0))
+
+                if x < 0 and (state[x] * 6) - y - car.L == -1:
+                    actions.append((car, 1, 0))
+            else: #vertical        
+                # (i * N) + j
+                # check above the car  [(i * 6) + (j - 1)]
+                if y > 0 and (state[x] * 6) + x - car.L:
+
+                # check below the car  [(i * 6) + (j + 1)]
+                if y > 0 and (state[x] * 6) + x + car.L:
+                
         '''Complete'''
 
     def goal_test(self, state):  
         #is the red car EXACTLY where it needs to be on the grid, in the right orientation?
         '''Complete - Return True if the state is a goal. False otherwise'''
         
+        
+    # must advance to the next state based on the action taken from the current state
     def result(self, state, action):
         '''Complete'''
 
@@ -178,7 +231,7 @@ def main():
     '''
       
     #Example: Running a single file
-    grid = readGridFromFile("puzzles/3.txt")
+    grid = readGridFromFile("A1/puzzles/3.txt")
     state = RHState(grid)
     print(state)
     
