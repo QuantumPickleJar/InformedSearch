@@ -1,4 +1,4 @@
-from search import Problem, iterative_deepening_search
+from search import Problem, iterative_deepening_search, breadth_first_search
 
 '''
 You have two jugs measuring 4 and 9 liters. Both jugs are initially empty; assume you have
@@ -129,7 +129,9 @@ def main():
     problem = JugProblem(initState, goalState)
     
     #Once the problem is created, we cna perform a search on it
-    goal = iterative_deepening_search(problem)
+    #goal = iterative_deepening_search(problem)
+    goal = breadth_first_search(problem)
+
     print("\nPath = ", goal.path(),"\n\nPath cost = ", goal.path_cost)
     print()
     print("\nSolution = ",goal.solution())
