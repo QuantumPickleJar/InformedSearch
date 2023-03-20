@@ -143,11 +143,10 @@ class RushHour(Problem):
 
         # If the car is horizontal
         if car_red.orientation:         
-            if car_red.left > 0:        # left is valid
+            if car_red.left > 0:       
                 actions.append((car_red, -1, 0))
 
-            # if car_red.left < (state.grid[car_red.left] * 6) - car_red.L:        # right is valid
-            if car_red.left < state.grid - car_red.L:        # right is valid
+            if car_red.left < len(state.grid) - car_red.L:        
                 actions.append((car_red, 1, 0))
             
         else: # if the car is vertical 
@@ -155,46 +154,73 @@ class RushHour(Problem):
                 actions.append((car_red, 0, 1))
             
             # if car_red.top > (state.grid[car_red.top] * 6) - car_red.L:         # down is valid
-            if car_red.top < state.grid - car_red.L:         # down is valid
+            if car_red.top < len(state.grid) - car_red.L:         # down is valid
                 actions.append((car_red, 0, -1))
-            
         
         # determine where OTHER cars can go 
-        #pos[0] = left, pos[1] = top
         for car in state.cars:
+            if car.id == 0:
+                break
             x = car.left
             y = car.top
-            
+        
             # horizontal 
             if car.orientation: 
                 # check left
-                if x > 0 and (state[x] * 6) + y - car.L == -1:
+                if x > 0 and state.grid[x - car.L][y]  == -1:
                     actions.append((car, -1, 0))
 
-                if x < 0 and (state[x] * 6) - y - car.L == -1:
+                # check right         
+                if x + car.L < len(state.grid) and state.grid[x + car.L][y] == -1:
                     actions.append((car, 1, 0))
             else: #vertical        
                 # (i * N) + j
-                # check above the car  [(i * 6) + (j - 1)]
-                if y > 0 and (state[x] * 6) + x - car.L:
+                # check above the car  
+                if y > 0 and state.grid[x][y - car.L] == -1:
+                    actions.append((car, 0, -1))
 
-                # check below the car  [(i * 6) + (j + 1)]
-                if y > 0 and (state[x] * 6) + x + car.L:
-                
-        '''Complete'''
+                # check below the car  
+                if y + car.L < len(state.grid) and state.grid[x][y + car.L] == -1:
+                    actions.append((car, 0, 1))
 
     def goal_test(self, state):  
         #is the red car EXACTLY where it needs to be on the grid, in the right orientation?
-        '''Complete - Return True if the state is a goal. False otherwise'''
+        if state.cars[0].left == 2 and state.cars[0].top == 6:
+            return True
+        else:
+            return False
         
         
     # must advance to the next state based on the action taken from the current state
     def result(self, state, action):
-        '''Complete'''
+
+        # apply the move to the car based on the action
+        result_grid = [[state.grid[i][j] for j in range(len(state.grid[0]))]\
+                        for i in range(len(state.grid))]    
+        updated_cars = []
+        
+        for car in state.cars:
+            # if the action calls for this car to move:
+            if car == action[0]:
+                new_car = Car(car.id, car.top + action[2],  \
+                                car.left + action[1], car.L, car.orientation)
+                updated_cars.append(new_car)
+            else:   # otherwise, we can just pass it right back in 
+                updated_cars.append(car)
+
+        # initalize the problem with the new grid
+        new_state = RHState(result_grid)
+        new_state.cars = updated_cars
+        
+        return new_state
+                    
 
     #Override this to be something meaningful in your domain, if you extend this class"
     def h(self, node):
         '''Modify this to add other heuristics. You can use self.heuristic to switch between different heuristics'''    
+        # what if we looked for the number of vehicles blocking the goal position?
+
+        # alternatively, we could just measure how many cells away from the goal position the red car is
         if (self.heuristic==0):
             return 0
  
