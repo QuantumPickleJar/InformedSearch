@@ -125,63 +125,46 @@ class RushHour(Problem):
     def __init__(self, initState, heuristic=0):
         Problem.__init__(self, initState)
         self.heuristic=heuristic
-         
+
+
     def actions(self, state):     
-
-        '''
-         To make for simpler programming, recall that a 2D board is a matrix
-         which can be flattened to a list of size i * j (where i and j are 
-         dimensions of the board)  
-         Thus, in a game board of size N*N, to access an element at row i and column j:  
-                (i * N) +  j
-        '''
+        actions = []
         
-        actions = []         # Tuple: { CarToMove, leftChange, topchange }
-        
-        # determine where the red car can go
-        car_red = state.cars[0]
-
-        # If the car is horizontal
-        if car_red.orientation:         
-            if car_red.left > 0:       
-                actions.append((car_red, -1, 0))
-
-            if car_red.left < len(state.grid) - car_red.L:        
-                actions.append((car_red, 1, 0))
-            
-        else: # if the car is vertical 
-            if car_red.top > 0:         # up is valid
-                actions.append((car_red, 0, 1))
-            
-            # if car_red.top > (state.grid[car_red.top] * 6) - car_red.L:         # down is valid
-            if car_red.top < len(state.grid) - car_red.L:         # down is valid
-                actions.append((car_red, 0, -1))
-        
-        # determine where OTHER cars can go 
+        # if you change one action, you must change all of them
+        # determine where cars can go 
         for car in state.cars:
-            if car.id == 0:
-                break
             x = car.left
             y = car.top
         
             # horizontal 
             if car.orientation: 
                 # check left
-                if x > 0 and state.grid[x - car.L][y]  == -1:
-                    actions.append((car, -1, 0))
+                if x > 0:
+                    # check if space is empty
+                    if state.grid[y][x - 1] == -1:
+                        # actions.append((car, 0, -1))
+                        actions.append((car.id, 'left'))
 
                 # check right         
-                if x + car.L < len(state.grid) and state.grid[x + car.L][y] == -1:
-                    actions.append((car, 1, 0))
-            else: #vertical        
-                # (i * N) + j
+                if x + car.L < len(state.grid):
+                    # check if space is empty
+                    if state.grid[y][x + car.L] == -1:
+                        # actions.append((car, 0, 1))
+                        actions.append((car.id, 'right'))
+            else:     
                 # check above the car  
-                if y > 0 and state.grid[x][y - car.L] == -1:
-                    actions.append((car, 0, -1))
+                if y > 0:
+                    # check if space is empty
+                    if state.grid[y - car.L][x] == -1:
+                        # actions.append((car, 1, 0))
+                        actions.append((car.id, 'up'))                        
 
                 # check below the car  
-                if y + car.L < len(state.grid) and state.grid[x][y + car.L] == -1:
-                    actions.append((car, 0, 1))
+                if y + car.L < len(state.grid):
+                    # check if space is empty
+                    if state.grid[y - car.L][x] == -1:
+                        # actions.append((car, 1, 0))
+                        actions.append((car.id, 'down'))                        
 
     def goal_test(self, state):  
         #is the red car EXACTLY where it needs to be on the grid, in the right orientation?
@@ -189,38 +172,72 @@ class RushHour(Problem):
             return True
         else:
             return False
-        
-        
+
     # must advance to the next state based on the action taken from the current state
     def result(self, state, action):
+        # parse the top and left modification from the action
+        car_id, move = action 
+
+        # result_grid = [[state.grid[i][j] for j in range(len(state.grid[0]))]\
+        #                for i in range(len(state.grid))]    
+    
+        result_grid = [row[:] for row in state.grid]
+
+        car = state.cars[car_id]
 
         # apply the move to the car based on the action
-        result_grid = [[state.grid[i][j] for j in range(len(state.grid[0]))]\
-                        for i in range(len(state.grid))]    
-        updated_cars = []
-        
-        for car in state.cars:
             # if the action calls for this car to move:
-            if car == action[0]:
-                new_car = Car(car.id, car.top + action[2],  \
-                                car.left + action[1], car.L, car.orientation)
-                updated_cars.append(new_car)
-            else:   # otherwise, we can just pass it right back in 
-                updated_cars.append(car)
+
+        if car.orientation: 
+            if move == 'left':
+                result_grid[car.top][car.left - 1] = car.id
+                # update empty cell
+                
+                result_grid[car.top][car.left + car.L - 1] = -1     
+                # update the car's property to reflect the move
+                car.left -= 1
+
+            else: # move = right 
+                result_grid[car.top][car.left + car.L] = car.id
+                result_grid[car.top][car.left] = -1     
+                # update the car's property to reflect the move
+                car.left += 1
+        else: 
+            if move == 'up':
+                result_grid[car.top - 1][car.left] = car.id
+                result_grid[car.top + car.L - 1][car.left] = -1     
+                car.left -= 1
+
+            else:  # move = down
+                result_grid[car.top + car.L][car.left] = car.id
+                result_grid[car.top][car.left] = -1     
+                # update the car's property to reflect the move
+                car.top += 1
+
+            # if car == action[0]:
+            #     new_car = Car(car.id, car.top + action[2],  \
+            #                     car.left + action[1], car.L, car.orientation)
+            #     updated_cars.append(new_car)
+            # else:   # otherwise, we can just pass it right back in 
+            #     updated_cars.append(car)
 
         # initalize the problem with the new grid
+        
         new_state = RHState(result_grid)
-        new_state.cars = updated_cars
         
         return new_state
                     
 
-    #Override this to be something meaningful in your domain, if you extend this class"
+    '''
+        Heuristic that is admissible because it never overestimates distance to goal;
+        other cars can only block and do not reduce the distance to the goal.
+    '''
     def h(self, node):
-        '''Modify this to add other heuristics. You can use self.heuristic to switch between different heuristics'''    
-        # what if we looked for the number of vehicles blocking the goal position?
-
-        # alternatively, we could just measure how many cells away from the goal position the red car is
+        car_red = node.state.cars[0]
+        dist = len(node.state.grid) - car_red.left - car_red.L
+        return dist
+        # alternate heuristic ideas:
+        # what if we weighted vehicles by their L and use this to calcualte a weighted path to goal position?
         if (self.heuristic==0):
             return 0
  
