@@ -141,34 +141,32 @@ class RushHour(Problem):
                 # check left
                 if x > 0:
                     # check if space is empty
-                    if state.grid[y][x - 1] == -1:
-                        # actions.append((car, 0, -1))
+                    if state.grid[y][x - 1] == -1 and car.orientation is True:
                         actions.append((car.id, 'left'))
 
                 # check right         
                 if x + car.L < len(state.grid):
                     # check if space is empty
-                    if state.grid[y][x + car.L] == -1:
-                        # actions.append((car, 0, 1))
+                    if state.grid[y][x + car.L] == -1 and car.orientation is True:
                         actions.append((car.id, 'right'))
             else:     
                 # check above the car  
                 if y > 0:
                     # check if space is empty
-                    if state.grid[y - car.L][x] == -1:
-                        # actions.append((car, 1, 0))
+                    # if state.grid[y - car.L][x] == -1:
+                    if state.grid[y - 1][x] == -1 and car.orientation is False:
                         actions.append((car.id, 'up'))                        
 
                 # check below the car  
                 if y + car.L < len(state.grid):
                     # check if space is empty
-                    if state.grid[y - car.L][x] == -1:
-                        # actions.append((car, 1, 0))
-                        actions.append((car.id, 'down'))                        
+                    if state.grid[y + car.L][x] == -1 and car.orientation is False:
+                        actions.append((car.id, 'down'))        
+        return actions
 
     def goal_test(self, state):  
         #is the red car EXACTLY where it needs to be on the grid, in the right orientation?
-        if state.cars[0].left == 2 and state.cars[0].top == 5:
+        if state.cars[0].left == 4 and state.cars[0].top == 2:
             return True
         else:
             return False
@@ -178,71 +176,96 @@ class RushHour(Problem):
         # parse the top and left modification from the action
 
         # apply the move to the car based on the action
-        car_id, dx, dy = action
+        car_id, move = action
+
         result_grid = [row[:] for row in state.grid]
+        dy,dx = 0,0
+
+        if move == 'left':
+            dy, dx = 0, -1
+        if move == 'right':
+            dy, dx = 0, 1
+        if move == 'up':
+            dy, dx = -1, 0
+        if move == 'down':
+            dy, dx = 1, 0
+
+        '''
+        example: in puzzle 3:
+        -1 -1 -1  1 -1 -1
+        -1 -1 -1  1 -1 -1
+         0  0 -1  1 -1 -1 GOAL
+        -1 -1 -1 -1 -1 -1
+        -1  2 -1 -1 -1 -1
+        -1  2  3  3  4  4
+        Move right:
+        INITIAL:  red_car [top, left] = [2,0] L=2, True
+        DESIRED:  red_car [top, left] = [2,1] L=2, True
+        dy, dx = 0,1
+
+        Move down:
+        INTIAL:  car_1 [top, left] = [0,3] 
+        DESIRED: car_1 [top, left] = [1,3] 
+        dy, dx = 1,0
+
+        example, puzzle 5:
+          2  2 -1 -1 -1  7
+          1 -1 -1  3 -1  7
+          1  0  0  3 -1  7 GOAL 
+          1 -1 -1  3 -1 -1
+          5 -1 -1 -1  6  6
+          5 -1  4  4  4 -1
+
+
+        Move left:
+        INTIAL:  car_6 [top, left] = [4,4] 
+        DESIRED: car_6 [top, left] = [4,3] 
+        dy, dx = 0,-1
+        Move up:
+        INTIAL:  car_3 [top, left] = [,] L = 3
+        DESIRED: car_3 [top, left] = [,] L = 3
+        dy, dx = -1,0
+        '''
 
         car = state.cars[car_id]
-        top, left, L, orientation = car.top + dy, car.left + dx, car.L, car.orientation
+        new_top, new_left, L, orientation = car.top + dy, car.left + dx, car.L, car.orientation
+
+# todo: make sure the directions all correlate to the proper update on the board-
 
         # first, update empty spaces to reflect the move
         if orientation:
-            for j in range(left, left + L):
-                result_grid[top][j] = -1
+            # handle left/right cells that will be empty 
+            if move == 'left':
+                result_grid[new_top][car.left + 1] = -1
+                i = 0
+                while i < L: 
+                    result_grid[new_top][new_left + i] = car_id
+                    i += 1
+
+            if move == 'right':
+                result_grid[new_top][new_left - 1] = -1
+                i = 0
+                while i < L: 
+                    result_grid[new_top][new_left + i] = car_id
+                    i += 1
+
         else:
-            for i in range(top, top + L):
-                result_grid[i][left] = -1
+            # handle up/down cells that will be empty 
+            if move == 'up':
+                result_grid[(new_top + L - 1) + 1][new_left] = -1
+                i = 0
+                while i < L:
+                    result_grid[new_top + i][new_left] = car_id
+                    i += 1
 
-        # for i in range(top, top + L):
-        #     for j in range (left, left + L):
-        #         result_grid[i][j] = -1
+            if move == 'down':
+                result_grid[new_top - 1][new_left] = -1
+                i = 0
+                while i < L: 
+                    result_grid[new_top + i][new_left] = car_id
+                    i += 1
 
-        # send new coordainates 
-        if orientation:
-            for j in range(left + dx, left + L + dx):
-                result_grid[top + dy][j] = id
-        else:
-            for i in range(top + dy, top + L + dy):
-                # result_grid[i][left + dx] = id
-                result_grid[i][left] = id
-
-
-
-
-        # for i in range(top, top + L):
-        #     for j in range(left, left + L):
-        #         result_grid[i][j] = car_id
-        '''
-        car = state.cars[car_id]
-
-        # if the action calls for this car to move:
-        if car.orientation: 
-        if move == 'left':
-            result_grid[car.top][car.left - 1] = car.id
-            # update empty cell
-            
-            result_grid[car.top][car.left + car.L - 1] = -1     
-            # update the car's property to reflect the move
-            car.left -= 1
-
-        else: # move = right 
-            result_grid[car.top][car.left + car.L] = car.id
-            result_grid[car.top][car.left] = -1     
-            # update the car's property to reflect the move
-            car.left += 1
-        else: 
-        if move == 'up':
-            result_grid[car.top - 1][car.left] = car.id
-            result_grid[car.top + car.L - 1][car.left] = -1     
-            car.left -= 1
-
-        else:  # move = down
-            result_grid[car.top + car.L][car.left] = car.id
-            result_grid[car.top][car.left] = -1     
-            # update the car's property to reflect the move
-            car.top += 1
-        '''
- 
-
+            # send the new coordinates
         # initalize the problem with the new grid
         
         new_state = RHState(result_grid)
@@ -256,6 +279,7 @@ class RushHour(Problem):
     '''
     
     def h(self, node):
+        return 0
         car_red = node.state.cars[0]
         dist = len(node.state.grid) - car_red.left - car_red.L
         return dist
@@ -298,7 +322,7 @@ def main():
     '''
       
     #Example: Running a single file
-    grid = readGridFromFile("A1/puzzles/3.txt")
+    grid = readGridFromFile("A1/puzzles/1.txt")
     state = RHState(grid)
     print(state)
     
