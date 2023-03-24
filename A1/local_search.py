@@ -62,11 +62,11 @@ class NQueenProblem(Problem):
 
 
         # Start by placing the first queen and building our search tree
-        for i in range(self.N):
-            for j in range(self.N):
-                if not self.conflict(i,j, state[i], state[j]):
-                    valid_moves.append((i,j))
 
+        # THIS is how we iterate over the 1D board.  i,j indices are for 2D
+        for row, col in enumerate(state):
+            if not self.conflict(row, col, state[row], state[col]):
+                valid_moves.append((row, col))
 
         # return the neighbors of a given state
         return valid_moves
@@ -101,19 +101,11 @@ class NQueenProblem(Problem):
         count = (self.N * (self.N - 1)) / 2
 
         # loop through all of the rows columns and count the number of non-conflicting queens
-
-
-        '''
-        Right now, we are performing a Cartesian check, when we instead want to check the '''
-
-
-
-        for i in range(self.N):
-            for j in range(self.N):
-                # Does the current queen conflict with where 
-                # the new queen will be placed?
-                if self.conflict(i,j,state[i],state[j]):
-                    count -= 1
+        for row, col in enumerate(state):
+            # Does the current queen conflict with where 
+            # the new queen will be placed?
+            if self.conflict(row, col, state[row], state[col]):
+                count -= 1
         return count
 
     def conflict(self, row1, col1, row2, col2):    
@@ -145,11 +137,16 @@ def generateNQueenState(N):
 def main():
     
 
-    #init_state = generateNQueenState(4)
-    init_state = [2,0,3,1]
+    init_state = generateNQueenState(4)
+    #init_state = [2,0,3,1] # DEBUG LINE
     print(init_state)
     problem = NQueenProblem(4, init_state)
-    simulated_annealing(problem, exp_schedule1())
+
+    four_result = simulated_annealing(problem, exp_schedule1())
+    four_result2 = simulated_annealing(problem, exp_schedule2())
+
+    # eight_result = simulated_annealing(problem, exp_schedule2())
+    print(f"4-Queen solution for the first annealing schedule: {four_result}")
 
     '''
         state = RHState(grid)
