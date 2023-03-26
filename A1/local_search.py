@@ -52,13 +52,6 @@ class NQueenProblem(Problem):
         self.initial = init
 
 
-
-    '''
-        Note:
-        The actions method may be used in some other recursive function in order 
-        to achive backtracking, but it will be used outside of the backtracking 
-        to generate the initial set of moves from the initial state.
-    '''
     def actions(self, state):
         '''
         Implement this method.
@@ -67,34 +60,17 @@ class NQueenProblem(Problem):
         '''
         valid_moves = []
 
+
         # Start by placing the first queen and building our search tree
 
-        # noQueens is one-based, so checking [i-1] columns would actually be [0-(i-2)]
-
-        # THIS is how we iterate over the 1D board.  i,j indices are for 2D...
+        # THIS is how we iterate over the 1D board.  i,j indices are for 2D
         for row, col in enumerate(state):
-
-            # Check all the rows for this column
-            for next_row in self.N:
-
-                # check if placing queen at next_row is safe
-                if not self.conflict(next_row, col, row, col):
-                    # The move must be valid, add it to moves!
-                    valid_moves.append((next_row, col))
-
-            next_row = row
-            # Check all the columns for this row
-            for next_col in self.N:
-                # check if placing queen at next_col is safe
-                if next_col != col and not self.conflict(row, next_col, row, col):
-                    # The move must be valid, add it to moves!
-                    valid_moves.append((next_row, next_col))
+            if not self.conflict(row, col, state[row], state[col]):
+                valid_moves.append((row, col))
 
         # return the neighbors of a given state
         return valid_moves
         
-
-    # Separate from result(), we need to probe the state space 
             
     def result(self, state, action):
         ''' Modify this if your result state is different from your action'''
@@ -132,25 +108,17 @@ class NQueenProblem(Problem):
                 count -= 1
         return count
 
-
-    '''returns true if a queen at [row1,col1] would conflict with the cell at [row2,col2]?'''
     def conflict(self, row1, col1, row2, col2):    
-        
+        '''
+        Utility method. You can use this in other methods.
+        Would putting two queens in (row1, col1) and (row2, col2) conflict?
+        '''
         return (row1 == row2 ## same row
                 or col1 == col2 ## same column
                 or row1-col1 == row2-col2  ## same \ diagonal
                 or row1+col1 == row2+col2) ## same / diagonal
     
     #You may add other helper methods in this class
-
-    def get_valid_init_state(self, N):
-        state = generateNQueenState(N)
-        if not any(self.conflict(state[i], i, state[j],j) 
-            for i in self.N 
-            for j in self.N 
-                if i < j):
-            return state
-
 
 
 ############################################################ 
@@ -169,8 +137,7 @@ def generateNQueenState(N):
 def main():
     
 
-    #init_state = generateNQueenState(4)
-    init_state = self.get_valid_init_state(4)
+    init_state = generateNQueenState(4)
     #init_state = [2,0,3,1] # DEBUG LINE
     print(init_state)
     problem = NQueenProblem(4, init_state)
