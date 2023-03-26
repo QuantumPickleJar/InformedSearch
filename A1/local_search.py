@@ -95,7 +95,59 @@ class NQueenProblem(Problem):
         
 
     # Separate from result(), we need to probe the state space 
+    
+    # returns a solution or a failure
+    def backtrack_search_init(self, state):
+        init_state = [None] * self.N
+        return self.backtrack_search(init_state)
+
+    '''
+    Recursively searchs for possible solutions viabacktracking. 
+    '''
+    def backtrack_search(self, state):
+        # [ BASE CASE ]
+        # if all queens placed, return the state
+        if self.isSolution(state):
+            # Make sure that the solution is valid first
+            if(self.goal_test(state)):  #TODO:  MAY NEED TO REMOVE THIS LINE
+                return state            
+            else: 
+                return None        
             
+        pending_queen_index = self.get_pending_queen_index(state)
+
+        # [ RECURSIVE CASE ]
+        # if there are still queens that have not been placed,
+        # try to place them in a safe column.
+        for col in range(self.N):
+            if not self.is_unsafe(state, pending_queen_index, col):
+
+                new_state = state.copy()
+                new_state[pending_queen_index] = col
+                
+                result = self.backtrack_search(new_state)
+                if result is not None:
+                    return result
+
+        # if there are no more queens to place, return None
+        return None
+ 
+    # Returns the index of the queen that must be placed next
+    def get_pending_queen_index(self, state):
+        for i in range(len(state)):
+            if state[i] == None:
+                return i
+        return None
+
+
+    # Determines if the state has all four queens placed
+    def isSolution(self, state):
+        if None in state:
+            return False
+        else:
+            return True
+
+
     def result(self, state, action):
         ''' Modify this if your result state is different from your action'''
         # incoming looks like '(x, y)'
@@ -143,13 +195,29 @@ class NQueenProblem(Problem):
     
     #You may add other helper methods in this class
 
-    def get_valid_init_state(self, N):
-        state = generateNQueenState(N)
-        if not any(self.conflict(state[i], i, state[j],j) 
-            for i in self.N 
-            for j in self.N 
-                if i < j):
-            return state
+    # Check if placing a queen at row, col is unsafe with any queens
+    def is_unsafe(self, state, row, col):
+        for i in range(self.N):
+            if state[i] is not None and self.conflict(i, state[i], row, col):
+                return True
+            return False
+
+    def get_valid_init_state(self, state):
+        
+        while True:
+            state = generateNQueenState(self.N)
+            if not any(self.conflict(state[i], i, state[j], j)
+                for i in range(self.N) \
+                    # start from i + 1 to avoid checking pairs twice
+                    for j in range(i + 1, self.N) if i < j):
+                return state
+            
+            '''
+                Wow!  Python is incredible... using 'List Comprehension'
+                we can generate a new state with appropriately ranged values 
+                that are zero-based) 
+            '''
+            state = [random.randrange(self.N) for i in range(self.N)]
 
 
 
@@ -170,7 +238,8 @@ def main():
     
 
     #init_state = generateNQueenState(4)
-    init_state = self.get_valid_init_state(4)
+    problem = NQueenProblem(4,None)
+    init_state = problem.get_valid_init_state(4)
     #init_state = [2,0,3,1] # DEBUG LINE
     print(init_state)
     problem = NQueenProblem(4, init_state)
