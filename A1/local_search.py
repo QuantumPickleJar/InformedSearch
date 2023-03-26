@@ -121,10 +121,10 @@ class NQueenProblem(Problem):
         # try to place them in a safe column.
         for col in range(self.N):
             if not self.is_unsafe(state, pending_queen_index, col):
-
+                # The state is safe, so we can continue searching
                 new_state = state.copy()
                 new_state[pending_queen_index] = col
-                
+                # initiate a new recursive call to the stack
                 result = self.backtrack_search(new_state)
                 if result is not None:
                     return result
