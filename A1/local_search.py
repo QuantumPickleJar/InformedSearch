@@ -102,7 +102,7 @@ class NQueenProblem(Problem):
         return self.backtrack_search(init_state)
 
     '''
-    Recursively searchs for possible solutions viabacktracking. 
+    Recursively searchs for possible solutions via backtracking. 
     '''
     def backtrack_search(self, state):
         # [ BASE CASE ]
@@ -200,6 +200,19 @@ class NQueenProblem(Problem):
         for i in range(self.N):
             if state[i] is not None and self.conflict(i, state[i], row, col):
                 return True
+            return False
+
+
+    '''
+    Checks the entire board in the state for conflicts between all queens.
+    '''
+    def state_contains_conflict(self, state):
+        for i in range(self.N):
+            for j in range(i + 1, self.N):
+                if state[i] is not None and state[j] is not None    \
+                    and self.conflict(i, state[i], j, state[j]):
+                    
+                    return True
             return False
 
     def get_valid_init_state(self, state):
