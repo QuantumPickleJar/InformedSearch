@@ -67,28 +67,46 @@ class NQueenProblem(Problem):
         '''
         valid_moves = []
 
-        # Start by placing the first queen and building our search tree
-
-        # noQueens is one-based, so checking [i-1] columns would actually be [0-(i-2)]
-
-        # THIS is how we iterate over the 1D board.  i,j indices are for 2D...
+        # row = count of current iteration, col = value (c-th in index r) of the column
+        # Check all the rows for this column
         for row, col in enumerate(state):
 
-            # Check all the rows for this column
-            for next_row in self.N:
+            # Handle our corner cases of when row is N
+            if row == self.N:
+                next_row = 0
+            else:
+                next_row = row + 1
 
+            # for every tried row: 
+
+            # Check if the queen can be safely placed
+
+            # If it can, mark [next_row, next_col] as part of solution
+
+
+            while next_row < self.N:
                 # check if placing queen at next_row is safe
                 if not self.conflict(next_row, col, row, col):
                     # The move must be valid, add it to moves!
                     valid_moves.append((next_row, col))
+                next_row += 1
 
+            # No moves in this row found, move to the next row over
             next_row = row
             # Check all the columns for this row
-            for next_col in self.N:
+
+            # Handle corner case col = N
+            if col == self.N:
+                next_col = 0
+            else: 
+                next_col = col + 1
+                
+            while next_col < self.N:
                 # check if placing queen at next_col is safe
                 if next_col != col and not self.conflict(row, next_col, row, col):
                     # The move must be valid, add it to moves!
                     valid_moves.append((next_row, next_col))
+                next_col += 1
 
         # return the neighbors of a given state
         return valid_moves
@@ -107,11 +125,12 @@ class NQueenProblem(Problem):
     def backtrack_search(self, state):
         # [ BASE CASE ]
         # if all queens placed, return the state
-        if self.isSolution(state):
+        if self.is_NQueens_placed(state):
             # Make sure that the solution is valid first
-            if(self.goal_test(state)):  #TODO:  MAY NEED TO REMOVE THIS LINE
+            # maybe we shoudl use state_has_conflicts ?
+            #if(self.goal_test(state)):  #TODO:  MAY NEED TO REMOVE THIS LINE
                 return state            
-            else: 
+            #else: 
                 return None        
             
         pending_queen_index = self.get_pending_queen_index(state)
@@ -140,8 +159,8 @@ class NQueenProblem(Problem):
         return None
 
 
-    # Determines if the state has all four queens placed
-    def isSolution(self, state):
+    # Determines if the state is a valid solution
+    def is_NQueens_placed(self, state):
         if None in state:
             return False
         else:
@@ -215,22 +234,22 @@ class NQueenProblem(Problem):
                     return True
             return False
 
-    def get_valid_init_state(self, state):
-        
-        while True:
-            state = generateNQueenState(self.N)
-            if not any(self.conflict(state[i], i, state[j], j)
-                for i in range(self.N) \
-                    # start from i + 1 to avoid checking pairs twice
-                    for j in range(i + 1, self.N) if i < j):
-                return state
+    
+    # def is_solution(self, state):
+    #     while True:
+    #         state = generateNQueenState(self.N)
+    #         if not any(self.conflict(state[i], i, state[j], j)
+    #             for i in range(self.N) \
+    #                 # start from i + 1 to avoid checking pairs twice
+    #                 for j in range(i + 1, self.N) if i < j):
+    #             return state
             
-            '''
-                Wow!  Python is incredible... using 'List Comprehension'
-                we can generate a new state with appropriately ranged values 
-                that are zero-based) 
-            '''
-            state = [random.randrange(self.N) for i in range(self.N)]
+    #         '''
+    #             Wow!  Python is incredible... using 'List Comprehension'
+    #             we can generate a new state with appropriately ranged values 
+    #             that are zero-based) 
+    #         '''
+    #         state = [random.randrange(self.N) for i in range(self.N)]
 
 
 
@@ -250,15 +269,16 @@ def generateNQueenState(N):
 def main():
     
 
-    #init_state = generateNQueenState(4)
-    problem = NQueenProblem(4,None)
-    init_state = problem.get_valid_init_state(4)
+    init_state = generateNQueenState(4)
+    
+    #problem = NQueenProblem(4,None)
+    #init_state = problem.get_valid_init_state(4)
+    
     #init_state = [2,0,3,1] # DEBUG LINE
     print(init_state)
     problem = NQueenProblem(4, init_state)
 
     four_result = simulated_annealing(problem, exp_schedule1())
-    four_result2 = simulated_annealing(problem, exp_schedule2())
 
     # eight_result = simulated_annealing(problem, exp_schedule2())
     print(f"4-Queen solution for the first annealing schedule: {four_result}")
