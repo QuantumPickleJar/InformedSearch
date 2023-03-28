@@ -245,7 +245,7 @@ class RushHour(Problem):
                 Heuristic 2:
                 Length of the longest vehicle on the board
             '''
-            return max(x.L for x in node.cars) 
+            return max(x.L for x in node.state.cars) 
 
         '''
             (Basic) Heuristic 1: the minimum distance from the red car to the goal
@@ -285,14 +285,14 @@ def readGridFromFile(fileName):
 def main():
 
     #Example: Running a single file
-    grid = readGridFromFile("A1/puzzles/5.txt")
+    grid = readGridFromFile("A1/puzzles/7.txt")
     state = RHState(grid)
     print(state)
     
     for i in state.cars:
         print(i)
 
-    problem = RushHour(state,1)
+    problem = RushHour(state,2)
     
     start = timer()
     goal = astar_search(problem)
