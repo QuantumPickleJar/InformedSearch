@@ -279,7 +279,6 @@ class RushHour(Problem):
     '''
     
     def h(self, node):
-        return 0
         car_red = node.state.cars[0]
         dist = len(node.state.grid) - car_red.left - car_red.L
         return dist
@@ -322,7 +321,7 @@ def main():
     '''
       
     #Example: Running a single file
-    grid = readGridFromFile("A1/puzzles/1.txt")
+    grid = readGridFromFile("A1/puzzles/4.txt")
     state = RHState(grid)
     print(state)
     
