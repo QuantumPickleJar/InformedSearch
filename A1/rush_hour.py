@@ -190,53 +190,18 @@ class RushHour(Problem):
         if move == 'down':
             dy, dx = 1, 0
 
-        '''
-        example: in puzzle 3:
-        -1 -1 -1  1 -1 -1
-        -1 -1 -1  1 -1 -1
-         0  0 -1  1 -1 -1 GOAL
-        -1 -1 -1 -1 -1 -1
-        -1  2 -1 -1 -1 -1
-        -1  2  3  3  4  4
-        Move right:
-        INITIAL:  red_car [top, left] = [2,0] L=2, True
-        DESIRED:  red_car [top, left] = [2,1] L=2, True
-        dy, dx = 0,1
-
-        Move down:
-        INTIAL:  car_1 [top, left] = [0,3] 
-        DESIRED: car_1 [top, left] = [1,3] 
-        dy, dx = 1,0
-
-        example, puzzle 5:
-          2  2 -1 -1 -1  7
-          1 -1 -1  3 -1  7
-          1  0  0  3 -1  7 GOAL 
-          1 -1 -1  3 -1 -1
-          5 -1 -1 -1  6  6
-          5 -1  4  4  4 -1
-
-
-        Move left:
-        INTIAL:  car_6 [top, left] = [4,4] 
-        DESIRED: car_6 [top, left] = [4,3] 
-        dy, dx = 0,-1
-        Move up:
-        INTIAL:  car_3 [top, left] = [,] L = 3
-        DESIRED: car_3 [top, left] = [,] L = 3
-        dy, dx = -1,0
-        '''
-
         car = state.cars[car_id]
         new_top, new_left, L, orientation = car.top + dy, car.left + dx, car.L, car.orientation
 
-# todo: make sure the directions all correlate to the proper update on the board-
+        # make sure the directions all correlate to the proper update on the board-
 
         # first, update empty spaces to reflect the move
         if orientation:
             # handle left/right cells that will be empty 
             if move == 'left':
-                result_grid[new_top][car.left + 1] = -1
+
+                result_grid[new_top][(new_left + L - 1) + 1] = -1
+            
                 i = 0
                 while i < L: 
                     result_grid[new_top][new_left + i] = car_id
