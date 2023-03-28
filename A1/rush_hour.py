@@ -238,21 +238,31 @@ class RushHour(Problem):
         return new_state
                     
 
-    '''
-        Heuristic that is admissible because it never overestimates distance to goal;
-        other cars can only block and do not reduce the distance to the goal.
-    '''
-    
     def h(self, node):
-        car_red = node.state.cars[0]
-        dist = len(node.state.grid) - car_red.left - car_red.L
-        return dist
+        if self.heuristic == 2:
+            '''
+                (Basic)
+                Heuristic 2:
+                Length of the longest vehicle on the board
+            '''
+            return max(x.L for x in node.cars) 
+
+        '''
+            (Basic) Heuristic 1: the minimum distance from the red car to the goal
+            
+            Heuristic that is admissible because it never overestimates distance to goal;
+            other cars can only block and do not reduce the distance to the goal.
+        '''
+        if self.heuristic==1:
+            car_red = node.state.cars[0]
+            dist = len(node.state.grid) - car_red.left - car_red.L
+            return dist
     
         # alternate heuristic ideas:
         # what if we weighted vehicles by their L and use this to calcualte a weighted path to goal position?
         if (self.heuristic==0):
             return 0
- 
+
 ######################################################
 
 #utility method - read input file and convert it into a state/grid
@@ -273,27 +283,16 @@ def readGridFromFile(fileName):
 
 #Problem 3: modify this to demonstrate your code    
 def main():
-    '''
-    #Example: Running multiple files   
-    fileNames = ["puzzles/1.txt","puzzles/2.txt","puzzles/3.txt","puzzles/4.txt"]
-    headings = ['Algorithm']+fileNames
-    RHProblems = []
-    for f in fileNames:
-        grid = readGridFromFile(f)
-        state = RHState(grid)
-        RHProblems.append(RushHour(state,0)) #heuristic h0; change this to be your best heuristic
-    compare_searchers(problems=RHProblems, header=headings, searchers=[astar_search])  
-    '''
-      
+
     #Example: Running a single file
-    grid = readGridFromFile("A1/puzzles/4.txt")
+    grid = readGridFromFile("A1/puzzles/5.txt")
     state = RHState(grid)
     print(state)
     
     for i in state.cars:
         print(i)
 
-    problem = RushHour(state,0)
+    problem = RushHour(state,1)
     
     start = timer()
     goal = astar_search(problem)
