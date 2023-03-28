@@ -1,5 +1,4 @@
-from search import Problem, iterative_deepening_search
-
+from search import Problem, iterative_deepening_search, breadth_first_search
 '''
 You have two jugs measuring 4 and 9 liters. Both jugs are initially empty; assume you have
 an unlimited supply of water, and can empty jugs as often as desired. You want to measure
@@ -17,88 +16,87 @@ provide.'''
 '''
 class JugProblem(Problem):
 
-    #Reference: https://www.engineeringenotes.com/artificial-intelligence-2/state-space-search/notes-on-water-jug-problem-artificial-intelligence/34582#:~:text=The%20state%20space%20for%20this,in%20the%203%2Dgallon%20jug.
-    a = 0; b = 0; # current amount of water in jugs
+    a,b = 0,0 # current amount of water in jugs
     jugA = 9; jugB = 4 # jug capacity
 
     def __init__(self, initial, goal):
         Problem.__init__(self,initial, goal)
 
 
+    """Return True if the state is a goal.""" 
+    def goal_test(self, state):
+        return state[0] == 6
+
     # Builds a list of actions from which to choose from 
     def actions(self, state):
 
         list=[] # store the list of actions here
 
-        a = state[JugProblem.a]; b = state[JugProblem.b]
-
         # are we at the goal state?
-        if a == self.goal: 
-            print("goal reached", a, b)
-            return
+        if self.goal_test(state):
+            print("goal reached", state[0], state[1])
+            return list
+
+        a = state[0]; b = state[1]
+
 
         # can we fill A?
-        if self.validate_state(a + (self.jugA - a), b):
+        if a < self.jugA:
             list.append("a_max")
 
         # can we fill B?
-        if self.validate_state(a, b + (self.jugB - b)):
-                list.append("b_max")
+        if b < self.jugB:
+            list.append("b_max")
 
         # can we completely empty A?
-        if self.validate_state(0, b):
+        if a > 0:
              list.append("a_dump_all")
+             
 
         # can we completely empty B?
-        if self.validate_state(a, 0):
+        if b > 0:
              list.append("b_dump_all")
-   
-        # # can we completely empty A?
-        # if self.validate_state(a - self.jugA, b):
-        #      list.append("a_dump_all")
+             
+        
+        ### Target block
+        # can we empty all (or some) of A into B?
+        if a > 0 and b < self.jugB:
+            #if a + b <= self.jugB:
+                list.append("a_to_b")
+            # (a >= self.jugB - b or (a + b) >= self.jugB
+            
+        ### End target block
 
-        # # can we completely empty B?
-        # if self.validate_state(a, b - self.jugB):
-        #      list.append("b_dump_all")
+        # can we empty all (or some) of B into A?
+        if b > 0 and a < self.jugA and  \
+            (b >= self.jugA - a or b == self.jugB):
+             list.append("b_to_a")
 
-        # can we empty some of A into B?
-        if self.validate_state(a - (self.jugB - b), b):
-            list.append("part_a_to_b")
+        # # this first predicate handles adding to B when B is zero
+        # if (a != 0 and b == 0) or   \
+        #     b < self.jugB and a != 0: #and (self.jugB - b) + a <= self.jugB):
+        #         list.append("a_to_b")
 
-        # can we empty some of B into A?
-        if self.validate_state(a, b - (self.jugA - a)):
-            list.append("part_b_to_a")  
-
-        # can we empty all of A into B?
-        if self.validate_state(0, b + a):
-            list.append("a_to_b")
-
+        ''' 
+            A must not be full
+            A must have room for B
+            B must be non-zero 
+            adding B to A must not exceed A_max (handled in results)
+        '''
         # can we empty all of B into A?
-        if self.validate_state(a + b, 0):
-            list.append("b_to_a")  
+         
+        # # this first predicate handles adding to A when A is zero
+        # if (a == 0 and b != 0) or \
+        #     a < self.jugA and b != 0: # and (self.jugA - a) + b <= self.jugA:
+        #         list.append("b_to_a")  
         return list
 
 
 
-    # a - what is being done to the water in jug a
-    # b - what is being done to the water in jug b
-    def validate_state(self, a, b):
-        # verify capacity of jugs doesn't exceed max
-        if a > self.jugA or b > self.jugB: 
-            return False 
-        
-        # verify no negative quanitities
-        if a < 0 or b < 0: 
-            return False
-        
-        # jug can't be empty when pouring into another
-
-
-        return True
-
     def result(self, state, action):
+        newState = state
 
-        a, b = state[JugProblem.a], state[JugProblem.b]
+        a, b = state[0], state[1]
 
         if action == "a_max":
             newState = (self.jugA, b)
@@ -108,14 +106,22 @@ class JugProblem(Problem):
             newState = (0, b)
         elif action == "b_dump_all":
             newState = (a, 0)
-        elif action == "part_a_to_b":
-            newState = (a - a, a + b)
-        elif action == "part_b_to_a":
-            newState = (a + b, b - b)
+        ### Target block
         elif action == "a_to_b":
-            newState = (0, b + a)
+            b_vol_left = self.jugB - b
+            
+            b = min(a + b, self.jugB)
+            a = max(a - b_vol_left, 0)
+            newState = (a, b)
+        ### End target block
+
         elif action == "b_to_a":
-            newState = (a + b, 0)
+            a_vol_left = self.jugA - a
+            
+            a = min(a + b, self.jugA)
+            b = max(b - a_vol_left, 0)
+            newState = (a, b)
+
         return newState
         
 
